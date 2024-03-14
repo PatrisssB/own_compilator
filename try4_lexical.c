@@ -85,15 +85,6 @@ void tkerr(const Token *tk, const char *fmt, ...)
     exit(-1);
 }
 
-//  if a token is a keyword ? is needed? 
-int checkKeyword(const char *text) 
-{
-    if (strcmp(text, "break") == 0) return BREAK;
-    if (strcmp(text, "char") == 0) return CHAR;
-    // Add more keyword checks as needed
-    return ID; // If not a keyword, treat it as an identifier
-}
-
 // lexical analyzer
 int getNextToken(const char *input) 
 {
@@ -181,7 +172,6 @@ int getNextToken(const char *input)
 
             nextCh = input - pStartCh; // the length of ID
             // keywords tests
-            //question ? should i leave it that way or implement a function that does that ?
             if (nextCh == 2 && !memcmp(pStartCh, "if", 2))
                 addTk(IF);
             else if (nextCh == 3 && !memcmp(pStartCh, "int", 3))
