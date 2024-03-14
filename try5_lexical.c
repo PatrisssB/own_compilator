@@ -437,44 +437,46 @@ void printTokens(Token *tokens)
 
 int main(int argc, char *argv[]) 
 {
-    // Define a hardcoded string
+     // Define a hardcoded string
     const char *inputString = "ana123";
 
     int token;
-    while ((token = getNextToken(inputString)) != END) 
+    const char *p = inputString; // Pointer to the current character in the input string
+    while ((token = getNextToken(p)) != END && *p != '\0') 
     {
         switch (token) 
-{
-    case ID:
-        if (lastToken != NULL && lastToken->text != NULL) {
-            printf("Identifier: %s\n", lastToken->text);
+        {
+            case ID:
+                if (lastToken != NULL && lastToken->text != NULL) {
+                    printf("Identifier: %s\n", lastToken->text);
+                }
+                break;
+            case CT_INT:
+                if (lastToken != NULL && lastToken->text != NULL) {
+                    printf("Integer Constant: %s\n", lastToken->text);
+                }
+                break;
+            case CT_REAL:
+                if (lastToken != NULL && lastToken->text != NULL) {
+                    printf("Real Constant: %s\n", lastToken->text);
+                }
+                break;
+            case CT_CHAR:
+                if (lastToken != NULL && lastToken->text != NULL) {
+                    printf("Character Constant: %s\n", lastToken->text);
+                }
+                break;
+            case CT_STRING:
+                if (lastToken != NULL && lastToken->text != NULL) {
+                    printf("String Constant: %s\n", lastToken->text);
+                }
+                break;
+            //cases for other token types as needed
+            default:
+                printf("Token code: %d\n", token);
         }
-        break;
-    case CT_INT:
-        if (lastToken != NULL && lastToken->text != NULL) {
-            printf("Integer Constant: %s\n", lastToken->text);
-        }
-        break;
-    case CT_REAL:
-        if (lastToken != NULL && lastToken->text != NULL) {
-            printf("Real Constant: %s\n", lastToken->text);
-        }
-        break;
-    case CT_CHAR:
-        if (lastToken != NULL && lastToken->text != NULL) {
-            printf("Character Constant: %s\n", lastToken->text);
-        }
-        break;
-    case CT_STRING:
-        if (lastToken != NULL && lastToken->text != NULL) {
-            printf("String Constant: %s\n", lastToken->text);
-        }
-        break;
-    //cases for other token types as needed
-    default:
-        printf("Token code: %d\n", token);
-}
-
+        // Move to the next character in the input string
+        p++;
     }
 
     printTokens(tokens);
