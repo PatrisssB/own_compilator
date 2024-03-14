@@ -1,4 +1,1 @@
-ana123
-int a = 3
-r
-//comm
+int a = 3;

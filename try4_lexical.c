@@ -204,7 +204,7 @@ int getNextToken(const char *input)
             }
             return lastToken->code;
 
-        case 3:
+        /*case 3:
         
             //here i am confused as fuck
             if (isdigit(ch))
@@ -218,7 +218,23 @@ int getNextToken(const char *input)
             else
                 state = 4; //final state for CT_INT
         
-        break;
+        break;*/
+        case 3:
+    if (isdigit(ch))
+    {
+        input++;
+    }
+    else if (tolower(ch) == 'e')
+    {
+        input++;
+        state = 27;
+    }
+    else
+    {
+        state = 4; //final state for CT_INT
+    }
+    break;
+
         
         case 4:
         
@@ -251,6 +267,35 @@ int getNextToken(const char *input)
             }
         break;
 
+        case 27:
+    if (isdigit(ch))
+    {
+        input++;
+        state = 28;
+    }
+    else if (ch == '+' || ch == '-')
+    {
+        input++;
+        state = 28;
+    }
+    else
+    {
+        tkerr(lastToken, "invalid real constant");
+    }
+    break;
+
+case 28:
+    if (isdigit(ch))
+    {
+        input++;
+    }
+    else
+    {
+        state = 12; //final state for CT_REAL
+    }
+    break;
+
+
 
         case 7:
             if (isalnum(ch))
@@ -261,7 +306,23 @@ int getNextToken(const char *input)
         break;
 
         case 8: 
-            if()
+    if (isdigit(ch)) 
+    {
+        input++;
+        state = 3;
+    } 
+    else if (tolower(ch) == 'a' || tolower(ch) == 'b' || tolower(ch) == 'c' || tolower(ch) == 'd' ||
+             tolower(ch) == 'e' || tolower(ch) == 'f')
+    {
+        input++;
+        state = 3;
+    } 
+    else 
+    {
+        tkerr(lastToken, "invalid hexadecimal digit");
+    }
+    break;
+
 
         break;
 
@@ -401,6 +462,27 @@ int main(int argc, char *argv[])
     while ((token = getNextToken(input)) != END) 
     {
         // Process tokens if needed
+        switch (token) 
+        {
+            case ID:
+                printf("Identifier: %s\n", lastToken->text);
+                break;
+            case CT_INT:
+                printf("Integer Constant: %s\n", lastToken->text);
+                break;
+            case CT_REAL:
+                printf("Real Constant: %s\n", lastToken->text);
+                break;
+            case CT_CHAR:
+                printf("Character Constant: %s\n", lastToken->text);
+                break;
+            case CT_STRING:
+                printf("String Constant: %s\n", lastToken->text);
+                break;
+            //cases for other token types as needed
+            default:
+                printf("Token code: %d\n", token);
+        }
     }
 
     printTokens(tokens);
