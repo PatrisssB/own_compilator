@@ -1,9 +1,19 @@
+//
+
 #define SAFEALLOC(var,Type) if((var=(Type*)malloc(sizeof(Type)))==NULL)err("not enough memory");
 
-enum{ID, END, CT_INT, ASSIGN, SEMICOLON, … }; // tokens codes
+enum
+{   
+    ID, 
+    END, 
+    CT_INT, 
+    ASSIGN, 
+    SEMICOLON, 
+    … 
+}; // tokens codes
 typedef struct _Token
 {
-    int code; // code (name)
+    int code; // code (name);
     union
     {
         char *text; // used for ID, CT_STRING (dynamically allocated)
