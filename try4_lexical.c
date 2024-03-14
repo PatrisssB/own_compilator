@@ -207,7 +207,6 @@ int getNextToken(const char *input)
         case 3:
         
             //here i am confused as fuck
-            //theoreticall from 3 & 5 i need to go in 8 or 9?
             if (isdigit(ch))
                 input++;
             else if( ch == '0')
@@ -246,13 +245,14 @@ int getNextToken(const char *input)
 
         case 6:
             if(isalnum(ch))
+            {
+                input++; //check this
                 state = 7;
-
+            }
         break;
 
 
         case 7:
-
             if (isalnum(ch))
                 input++;
             else
@@ -260,7 +260,12 @@ int getNextToken(const char *input)
 
         break;
 
-        case 30:
+        case 8: 
+            if()
+
+        break;
+
+        case 12:
 
             nextCh = input - pStartCh; // the real constant length
             addTk(CT_REAL);
@@ -268,7 +273,7 @@ int getNextToken(const char *input)
             tk->text = strndup(pStartCh, nextCh);
             return lastToken->code;
 
-        case 16:
+        case 26:
 
             if (ch != '\\' && ch != '\'')
                 input++;
@@ -290,7 +295,7 @@ int getNextToken(const char *input)
 
         break;
 
-        case 12:
+        case 16:
 
             // it's a character constant
             addTk(CT_CHAR);

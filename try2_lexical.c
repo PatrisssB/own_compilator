@@ -6,6 +6,7 @@
 //codes
 enum 
 {
+    TK_EOF,
     TK_IDENTIFIER,
     TK_NUMBER,
     TK_STRING,
@@ -32,13 +33,16 @@ enum
 };
 
 // Token structure
-typedef struct {
+typedef struct 
+{
     int code;
     char *value; // For tokens that need to store a value (like identifiers, numbers, strings, etc.)
+    struct Token *next;
 } Token;
 
 // Function to add a token to the list
-void addToken(Token **tokens, int code, const char *value) {
+void addToken(Token **tokens, int code, const char *value) 
+{
     Token *token = (Token *)malloc(sizeof(Token));
     token->code = code;
     token->value = strdup(value); // Duplicate the string to ensure it's not modified externally
@@ -46,9 +50,11 @@ void addToken(Token **tokens, int code, const char *value) {
 }
 
 // Function to free memory occupied by tokens
-void freeTokens(Token *tokens) {
+void freeTokens(Token *tokens) 
+{
     Token *temp;
-    while (tokens != NULL) {
+    while (tokens != NULL) 
+    {
         temp = tokens;
         tokens = tokens->next;
         free(temp->value);
