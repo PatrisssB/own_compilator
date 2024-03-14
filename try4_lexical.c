@@ -3,10 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
-
-#define SAFEALLOC(var, Type) \
-    if ((var = (Type *)malloc(sizeof(Type))) == NULL) \
-        err("not enough memory");
+#define SAFEALLOC(var,Type) if((var=(Type*)malloc(sizeof(Type)))==NULL)err("not enough memory");
 
 enum 
 {
@@ -16,6 +13,21 @@ enum
     CT_REAL,
     CT_CHAR,
     CT_STRING,
+    IF,
+    INT,
+    FOR,
+    VOID,
+    ELSE,
+    CHAR,
+    DOUBLE,
+    RETURN,
+    BREAK,
+    WHILE,
+    STRUCT,
+    SEMICOLON,
+    EQUAL,
+    ASSIGN
+
     // Add more token codes as needed
 }; // tokens codes
 
@@ -110,14 +122,14 @@ int getNextToken(const char *input)
                 state = 4;       
             } 
 
-            else if (ch == ' 0 ') 
+            else if (ch == '0') 
             {
                 pStartCh = input; //CT_INT base 8
                 input++;         
                 state = 5;        
             } 
     
-            else if (ch == ' \' ') 
+            else if (ch == '\'') 
             {
                 pStartCh = input;  //CT_CHAR
                 input++;         
@@ -129,7 +141,7 @@ int getNextToken(const char *input)
                 pStartCh = input; //CT_STRING
                 input++;         // consume the character
                 state = 13;       // set the new state for string constant
-
+            }
             /* MORE STATES FROM 0 NEED TO BE ADDED    
 
             } else if (ch == '=') {
@@ -169,6 +181,7 @@ int getNextToken(const char *input)
 
             nextCh = input - pStartCh; // the length of ID
             // keywords tests
+            //question ? should i leave it that way or implement a function that does that ?
             if (nextCh == 2 && !memcmp(pStartCh, "if", 2))
                 addTk(IF);
             else if (nextCh == 3 && !memcmp(pStartCh, "int", 3))
@@ -207,12 +220,14 @@ int getNextToken(const char *input)
             //theoreticall from 3 & 5 i need to go in 8 or 9?
             if (isdigit(ch))
                 input++;
-            else if( ch == " . ")
+            else if( ch == '0')
+                state = 9;
+            else if( ch == '.')
                 state = 10;
-            else if( ch == "e" || ch == "E")
+            else if( ch == 'e' || ch == 'E')
                 state = 13;
             else
-                state = 4 //final state for CT_INT
+                state = 4; //final state for CT_INT
         
         break;
         
@@ -222,22 +237,20 @@ int getNextToken(const char *input)
             // it's an integer constant
             addTk(CT_INT);
             SAFEALLOC(tk->text, char);
-            tk->text = strndup(pStartCh, nCh);
+            tk->text = strndup(pStartCh, nextCh);
             return lastToken->code;
 
 
         case 5:
         
             if (isdigit(ch) && (ch >= '0' && ch <= '7')) 
-            {
-                input++;
-            } 
+                input++; 
+            else if (ch == '8' || ch == '9')
+                state = 8;
             else if( ch == 'x' )
-            {
                 state = 6; 
-            }
             else
-                state 4;
+                state = 4;
 
         break;
 
@@ -257,12 +270,12 @@ int getNextToken(const char *input)
 
         break;
 
-        case 12:
+        case 30:
 
             nextCh = input - pStartCh; // the real constant length
             addTk(CT_REAL);
             SAFEALLOC(tk->text, char);
-            tk->text = strndup(pStartCh, nCh);
+            tk->text = strndup(pStartCh, nextCh);
             return lastToken->code;
 
         case 16:
@@ -285,7 +298,8 @@ int getNextToken(const char *input)
             } else
                 tkerr(lastToken, "invalid character constant");
 
-            break;
+        break;
+
         case 12:
 
             // it's a character constant
@@ -298,7 +312,8 @@ int getNextToken(const char *input)
 
             if (ch != '\\' && ch != '"')
                 input++;
-            else if (ch == '\\') {
+            else if (ch == '\\') 
+            {
                 input += 2; // skip over escape sequence
             } else
                 state = 14;
@@ -306,7 +321,8 @@ int getNextToken(const char *input)
             break;
         case 14:
 
-            if (ch == '"') {
+            if (ch == '"') 
+            {
                 input++;
                 state = 15;
             }
