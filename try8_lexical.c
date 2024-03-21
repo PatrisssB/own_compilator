@@ -336,10 +336,10 @@ int getNextToken(const char *input)
         case 16:
 
             // it's a character constant
-            addTk(CT_CHAR);
+            tk = addTk(CT_CHAR);
             SAFEALLOC(tk->text, char);
             tk->text = strndup(pStartCh, input - pStartCh);
-            return lastToken->code;
+            return tk->code;
 
         case 13:
 
@@ -365,10 +365,10 @@ int getNextToken(const char *input)
         case 15:
 
             // it's a string constant
-            addTk(CT_STRING);
+            tk = addTk(CT_STRING);
             SAFEALLOC(tk->text, char);
             tk->text = strndup(pStartCh, input - pStartCh);
-            return lastToken->code;
+            return tk->code;
 
         case 17:
 
@@ -380,18 +380,18 @@ int getNextToken(const char *input)
             break;
         case 19:
 
-            addTk(ASSIGN);
-            return lastToken->code;
+            tk = addTk(ASSIGN);
+            return tk->code;
 
         case 20:
 
-            addTk(EQUAL);
-            return lastToken->code;
+            tk = addTk(EQUAL);
+            return tk->code;
 
         case 18:
 
-            addTk(SEMICOLON);
-            return lastToken->code;
+            tk = addTk(SEMICOLON);
+            return tk->code;
         }
     }
 }
