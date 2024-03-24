@@ -10,8 +10,8 @@
 
 enum
 {
-    ID,
     END,
+    ID,
     CT_INT,
     CT_REAL,
     CT_CHAR,
@@ -27,10 +27,33 @@ enum
     BREAK,
     WHILE,
     STRUCT,
+    DOT,
+    DIV,
+    MUL,
+    SUB,
+    ADD,
+    LACC,
+    RACC,
+    LBRACKET,
+    RBRACKET,
+    LPAR,
+    RPAR,
     SEMICOLON,
+    COMMA,
+    AND,
+    OR,
+    NOT,
+    ASSIGN,
     EQUAL,
-    ASSIGN
-    // Add more token codes as needed
+    NOTEQ,
+    LESS,
+    LESSEQ,
+    GREATER,
+    GREATEREQ,
+    COMMENT,
+    LINE_COMMENT,
+    SPACE
+    //all the token were added 
 }; // tokens codes
 
 typedef struct _Token
@@ -95,9 +118,10 @@ void tkerr(const Token *tk, const char *fmt, ...)
 // lexical analyzer
 int getNextToken(const char *input)
 {
-    int state = 0, nextCh;
+    int state = 0;
+    int nextCh;
     char ch;
-    const char *pStartCh = input;
+    const char *pStartCh;
     Token *tk;
 
     while (1)
@@ -198,24 +222,35 @@ int getNextToken(const char *input)
             if (isdigit(ch))
             {
                 input++;
+                //base 10 case for CT_INT
             }
-            else if (tolower(ch) == 'e')
+            else if( ch == '0')
             {
                 input++;
-                state = 27;
+                state = 9;
+            }
+            else if (tolower(ch) == 'e' || toupper(ch) == 'E')
+            {
+                input++;
+                state = 13;
+            }
+            else if( ch == '.')
+            {
+                input++;
+                state = 10;
             }
             else
             {
                 state = 4; //final state for CT_INT
             }
-            break;
+        break;
 
         case 4:
 
             //nextCh = input - pStartCh; // the integer constant length
             // it's an integer constant
             addTk(CT_INT);
-            SAFEALLOC(tk->text, char);
+            //SAFEALLOC(tk->text, char);
             tk->text = strndup(pStartCh, nextCh);
             return tk->code;
 
@@ -223,175 +258,153 @@ int getNextToken(const char *input)
 
             if (isdigit(ch) && (ch >= '0' && ch <= '7'))
                 input++;
+                //case for base 8 for CT_INT
             else if (ch == '8' || ch == '9')
+            {
+                //input ++;
                 state = 8;
+            }
             else if (ch == 'x')
             {
                 input++;
                 state = 6;
             }
-            //else if( ch == '.')
-            //{
-            //    input ++;
-            //    state = 4;
-            //}
-            //else
-            //    state = 4;
-            //break;
+            else if( ch == '.')
+            {
+                input ++;
+                state = 13; //or state 10?
+            }
+            else if(ch == 'e' || ch == 'E' )
+            {
+                input ++;
+                state = 13;
+            }
+            else
+                state = 4;
+        break;
 
         case 6:
-            if (isalnum(ch))
+            if ((ch >= '0' && ch <= '9') || ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')))
             {
                 input++; //check this
                 state = 7;
             }
-            break;
-
-        case 27:
-            if (isdigit(ch))
-            {
-                input++;
-                state = 28;
-            }
-            else if (ch == '+' || ch == '-')
-            {
-                input++;
-                state = 28;
-            }
             else
             {
-                tkerr(lastToken, "invalid real constant");
+                //invalid character for base 16: 0x ... 
+                tkerr(addTk(END), "hexadecimal character incomplete/ written wrong 0x...";
+                return -1;
             }
-            break;
-
-        case 28:
-            if (isdigit(ch))
-            {
-                input++;
-            }
-            else
-            {
-                state = 12; //final state for CT_REAL
-            }
-            break;
+        break;
 
         case 7:
-            if (isalnum(ch))
+            if ((ch >= '0' && ch <= '9') || ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')))
+            {
                 input++;
-            else
+                
+            }
+            else 
+            {
                 state = 4;
-
-            break;
+            }
+        break; 
 
         case 8:
             if (isdigit(ch))
             {
                 input++;
-                state = 3;
+                state = 9;
             }
-            else if (tolower(ch) == 'a' || tolower(ch) == 'b' || tolower(ch) == 'c' || tolower(ch) == 'd' ||
-                     tolower(ch) == 'e' || tolower(ch) == 'f')
+            else if (ch=='e'||ch=='E')
             {
                 input++;
-                state = 3;
+                state = 13;
             }
-            else
+        break;
+
+        case 9:
+            if(isdigit(ch))
+                   input++;
+            else if (ch == 'e' || ch == 'E' )
             {
-                tkerr(lastToken, "invalid hexadecimal digit");
+                input ++;
+                state = 13;
             }
-            break;
+            else if (ch == '.')
+            {
+                input ++;
+                state = 10;
+            }
+        break;
 
-        case 12:
-
-            nextCh = input - pStartCh; // the real constant length
-            addTk(CT_REAL);
-            SAFEALLOC(tk->text, char);
-            tk->text = strndup(pStartCh, nextCh);
-            return lastToken->code;
-
-        case 26:
-
-            if (ch != '\\' && ch != '\'')
+        case 10:
+            if(isdigit(ch))
+            {
                 input++;
-            else if (ch == '\\')
-            {
-                input += 2; // skip over escape sequence
-            }
-            else
                 state = 11;
+            }
+        break;
 
-            break;
         case 11:
-
-            if (ch == '\'')
+            if(isdigit(ch))
             {
                 input++;
+            }
+            else if( ch == 'e' || ch == 'E' )
+            {
+                input++;
+                state = 13;
+            }
+            else
+            {
+                //CT_REAL 
                 state = 12;
             }
-            else
-                tkerr(lastToken, "invalid character constant");
+        break;
 
-            break;
-
-        case 16:
-
-            // it's a character constant
-            tk = addTk(CT_CHAR);
-            SAFEALLOC(tk->text, char);
-            tk->text = strndup(pStartCh, input - pStartCh);
-            return tk->code;
+        case 12:
+            tk = addTk(CT_REAL);
+            tk->text = strndup(pStartCh, nextCh);    
+        return tk->code; 
 
         case 13:
-
-            if (ch != '\\' && ch != '"')
-                input++;
-            else if (ch == '\\')
+            if( ch == '-' || ch == '+' )
             {
-                input += 2; // skip over escape sequence
+                input ++;
+                state = 14;
             }
             else
-                state = 14;
+                state = 15;
+        break;
 
-            break;
         case 14:
-
-            if (ch == '"')
+            if(isdigit(ch))
             {
-                input++;
                 state = 15;
             }
+        break;
 
-            break;
         case 15:
+            if(isdigit(ch))
+            {
+                    input ++;
+                    state = 12;
+            }
+        break;
 
-            // it's a string constant
-            tk = addTk(CT_STRING);
-            SAFEALLOC(tk->text, char);
-            tk->text = strndup(pStartCh, input - pStartCh);
-            return tk->code;
+        case 16:
+            if( ch == '\'')
+            {
+                input ++;
+                state = 17;
+            }
+        break;
 
         case 17:
-
-            if (ch == '=')
-                state = 19;
-            else
-                state = 20;
-
-            break;
-        case 19:
-
-            tk = addTk(ASSIGN);
-            return tk->code;
-
-        case 20:
-
-            tk = addTk(EQUAL);
-            return tk->code;
-
-        case 18:
-
-            tk = addTk(SEMICOLON);
-            return tk->code;
+            if(ch=='^'||ch=='\''||ch=='\\'){
+                    input++;
+                    state=18;
+        
         }
     }
 }
